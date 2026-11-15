@@ -1,0 +1,6 @@
+{
+  "name": "Eldoria RPG",
+  "description": "RPG de ação 2D estilo Zelda para derrotar monstros com espadas, coletar moedas, subir de nível e abrir baús com equipamentos cada vez melhores.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

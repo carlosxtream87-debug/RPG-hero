@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Eldoria RPG</string>
+    <string name="auth_badge">AVENTURA RPG 2D</string>
+    <string name="auth_subtitle">Enfrente monstros com sua espada, colete moedas e descubra baús com equipamentos lendários.</string>
+    <string name="auth_google_button">Entrar com Google</string>
+    <string name="auth_signing_in">Entrando na aventura...</string>
+    <string name="auth_footer_note">Entre com sua conta Google para salvar seu herói, nível, moedas e equipamentos na nuvem.</string>
+    <string name="feature_combat_title">Combate Estilo Zelda em 2D</string>
+    <string name="feature_combat_desc">Controle simples na tela para mover, esquivar e golpear monstros em 3 zonas exploráveis.</string>
+    <string name="feature_loot_title">Baús e Espadas Melhores</string>
+    <string name="feature_loot_desc">Abra baús espalhados pelo mapa e derrote chefes para saquear armas, escudos e amuletos raros.</string>
+    <string name="feature_rpg_title">Progressão RPG Completa</string>
+    <string name="feature_rpg_desc">Ganhe XP, suba de nível, compre poções na loja e equipe seus itens mais fortes.</string>
+    <string name="cd_hero_banner">Ilustração do herói de Eldoria RPG</string>
+    <string name="cd_backpack">Mochila e Equipamentos</string>
+    <string name="cd_shop">Loja do Ferreiro</string>
+    <string name="cd_map">Mapa de Zonas</string>
+    <string name="cd_attack">Atacar com espada ou abrir baú</string>
+    <string name="cd_potion">Usar poção de cura</string>
+    <string name="cd_dash">Esquiva rápida</string>
+    <string name="action_sign_out">Sair da conta</string>
+    <string name="action_new_game">Reiniciar Aventura</string>
+</resources>

@@ -1,0 +1,197 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isOptionalId(data, key) {
+      return !(key in data) || data[key] == null || (data[key] is string && data[key].size() <= 128);
+    }
+
+    function isValidHeroSave(data, userId) {
+      return data.userId is string &&
+             data.userId.size() >= 1 &&
+             data.userId.size() <= 128 &&
+             data.userId == userId &&
+             data.heroName is string &&
+             data.heroName.size() >= 1 &&
+             data.heroName.size() <= 40 &&
+             data.level is int &&
+             data.level >= 1 &&
+             data.level <= 99 &&
+             data.xp is int &&
+             data.xp >= 0 &&
+             data.xp <= 10000000 &&
+             data.coins is int &&
+             data.coins >= 0 &&
+             data.coins <= 10000000 &&
+             data.hp is int &&
+             data.hp >= 0 &&
+             data.hp <= 9999 &&
+             data.maxHp is int &&
+             data.maxHp >= 10 &&
+             data.maxHp <= 9999 &&
+             data.baseAttack is int &&
+             data.baseAttack >= 1 &&
+             data.baseAttack <= 999 &&
+             data.baseDefense is int &&
+             data.baseDefense >= 0 &&
+             data.baseDefense <= 999 &&
+             data.potions is int &&
+             data.potions >= 0 &&
+             data.potions <= 99 &&
+             data.currentZone is string &&
+             data.currentZone in ['meadow', 'ruins', 'keep'] &&
+             data.monstersSlain is int &&
+             data.monstersSlain >= 0 &&
+             data.monstersSlain <= 1000000 &&
+             data.chestsOpened is int &&
+             data.chestsOpened >= 0 &&
+             data.chestsOpened <= 100000 &&
+             isOptionalId(data, 'equippedWeaponId') &&
+             isOptionalId(data, 'equippedArmorId') &&
+             isOptionalId(data, 'equippedCharmId') &&
+             data.openedChestIds is list &&
+             data.openedChestIds.size() <= 40 &&
+             (data.openedChestIds.size() == 0 || data.openedChestIds[0] is string) &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    function isValidHeroItem(data, userId) {
+      return data.userId is string &&
+             data.userId.size() >= 1 &&
+             data.userId.size() <= 128 &&
+             data.userId == userId &&
+             data.templateId is string &&
+             data.templateId.size() >= 1 &&
+             data.templateId.size() <= 64 &&
+             data.name is string &&
+             data.name.size() >= 1 &&
+             data.name.size() <= 60 &&
+             data.slot is string &&
+             data.slot in ['weapon', 'armor', 'charm'] &&
+             data.rarity is string &&
+             data.rarity in ['common', 'uncommon', 'rare', 'epic', 'legendary'] &&
+             data.attackBonus is int &&
+             data.attackBonus >= 0 &&
+             data.attackBonus <= 999 &&
+             data.defenseBonus is int &&
+             data.defenseBonus >= 0 &&
+             data.defenseBonus <= 999 &&
+             data.hpBonus is int &&
+             data.hpBonus >= 0 &&
+             data.hpBonus <= 999 &&
+             data.critBonus is int &&
+             data.critBonus >= 0 &&
+             data.critBonus <= 100 &&
+             data.coinBonusPct is int &&
+             data.coinBonusPct >= 0 &&
+             data.coinBonusPct <= 200 &&
+             data.sellPrice is int &&
+             data.sellPrice >= 0 &&
+             data.sellPrice <= 99999 &&
+             data.colorHex is string &&
+             data.colorHex.size() >= 7 &&
+             data.colorHex.size() <= 9 &&
+             data.colorHex.matches('^#[0-9A-Fa-f]{6,8}$') &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    match /users/{userId}/hero_saves/{saveId} {
+      allow get: if isOwner(userId) && isValidId(saveId);
+      allow list: if isOwner(userId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(saveId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'heroName', 'level', 'xp', 'coins',
+                         'hp', 'maxHp', 'baseAttack', 'baseDefense', 'potions',
+                         'currentZone', 'monstersSlain', 'chestsOpened',
+                         'openedChestIds', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'heroName', 'level', 'xp', 'coins',
+                         'hp', 'maxHp', 'baseAttack', 'baseDefense', 'potions',
+                         'currentZone', 'monstersSlain', 'chestsOpened',
+                         'equippedWeaponId', 'equippedArmorId', 'equippedCharmId',
+                         'openedChestIds', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidHeroSave(incoming(), userId);
+
+      allow update: if isOwner(userId) &&
+                       isValidId(saveId) &&
+                       isValidHeroSave(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'heroName', 'level', 'xp', 'coins', 'hp', 'maxHp',
+                         'baseAttack', 'baseDefense', 'potions', 'currentZone',
+                         'monstersSlain', 'chestsOpened', 'equippedWeaponId',
+                         'equippedArmorId', 'equippedCharmId', 'openedChestIds',
+                         'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(saveId);
+    }
+
+    match /users/{userId}/hero_items/{itemId} {
+      allow get: if isOwner(userId) && isValidId(itemId);
+      allow list: if isOwner(userId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(itemId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'templateId', 'name', 'slot', 'rarity',
+                         'attackBonus', 'defenseBonus', 'hpBonus', 'critBonus',
+                         'coinBonusPct', 'sellPrice', 'colorHex', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'templateId', 'name', 'slot', 'rarity',
+                         'attackBonus', 'defenseBonus', 'hpBonus', 'critBonus',
+                         'coinBonusPct', 'sellPrice', 'colorHex', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidHeroItem(incoming(), userId);
+
+      allow update: if isOwner(userId) &&
+                       isValidId(itemId) &&
+                       isValidHeroItem(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'name', 'rarity', 'attackBonus', 'defenseBonus',
+                         'hpBonus', 'critBonus', 'coinBonusPct', 'sellPrice',
+                         'colorHex', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(itemId);
+    }
+  }
+}

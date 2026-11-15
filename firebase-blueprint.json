@@ -1,0 +1,205 @@
+{
+  "entities": {
+    "HeroSave": {
+      "title": "HeroSave",
+      "description": "Persistent RPG hero progress, stats, coins, zone, equipped gear IDs, and opened world chests.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated owner UID."
+        },
+        "heroName": {
+          "type": "string",
+          "description": "Hero display name (1 to 40 characters)."
+        },
+        "level": {
+          "type": "integer",
+          "description": "Current RPG level (1 to 99)."
+        },
+        "xp": {
+          "type": "integer",
+          "description": "Current experience points toward next level."
+        },
+        "coins": {
+          "type": "integer",
+          "description": "Collected gold coins."
+        },
+        "hp": {
+          "type": "integer",
+          "description": "Current hero hit points."
+        },
+        "maxHp": {
+          "type": "integer",
+          "description": "Base maximum hero hit points."
+        },
+        "baseAttack": {
+          "type": "integer",
+          "description": "Base hero attack stat without weapon bonus."
+        },
+        "baseDefense": {
+          "type": "integer",
+          "description": "Base hero defense stat without armor bonus."
+        },
+        "potions": {
+          "type": "integer",
+          "description": "Count of healing potions held."
+        },
+        "currentZone": {
+          "type": "string",
+          "enum": ["meadow", "ruins", "keep"],
+          "description": "Current explored 2D RPG zone."
+        },
+        "monstersSlain": {
+          "type": "integer",
+          "description": "Total monsters defeated."
+        },
+        "chestsOpened": {
+          "type": "integer",
+          "description": "Total loot chests opened."
+        },
+        "equippedWeaponId": {
+          "type": "string",
+          "description": "Document ID of currently equipped sword in hero_items."
+        },
+        "equippedArmorId": {
+          "type": "string",
+          "description": "Document ID of currently equipped shield/armor in hero_items."
+        },
+        "equippedCharmId": {
+          "type": "string",
+          "description": "Document ID of currently equipped relic charm in hero_items."
+        },
+        "openedChestIds": {
+          "type": "array",
+          "description": "Bounded list of static world chest IDs opened by the hero (max 40)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when save was created (clients must submit FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when save was last updated (clients must submit FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "heroName",
+        "level",
+        "xp",
+        "coins",
+        "hp",
+        "maxHp",
+        "baseAttack",
+        "baseDefense",
+        "potions",
+        "currentZone",
+        "monstersSlain",
+        "chestsOpened",
+        "openedChestIds",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "HeroItem": {
+      "title": "HeroItem",
+      "description": "An RPG sword, shield/armor, or charm looted from chests or monsters.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated owner UID."
+        },
+        "templateId": {
+          "type": "string",
+          "description": "Item archetype key for rendering sprite/style."
+        },
+        "name": {
+          "type": "string",
+          "description": "Localized RPG item name (1 to 60 characters)."
+        },
+        "slot": {
+          "type": "string",
+          "enum": ["weapon", "armor", "charm"],
+          "description": "Equipment slot."
+        },
+        "rarity": {
+          "type": "string",
+          "enum": ["common", "uncommon", "rare", "epic", "legendary"],
+          "description": "Loot rarity tier."
+        },
+        "attackBonus": {
+          "type": "integer",
+          "description": "Attack power added when equipped."
+        },
+        "defenseBonus": {
+          "type": "integer",
+          "description": "Defense added when equipped."
+        },
+        "hpBonus": {
+          "type": "integer",
+          "description": "Max HP added when equipped."
+        },
+        "critBonus": {
+          "type": "integer",
+          "description": "Critical strike chance percentage bonus."
+        },
+        "coinBonusPct": {
+          "type": "integer",
+          "description": "Extra coin drop percentage bonus."
+        },
+        "sellPrice": {
+          "type": "integer",
+          "description": "Gold coins earned when selling this item."
+        },
+        "colorHex": {
+          "type": "string",
+          "description": "Blade/aura hex color (#RRGGBB)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when looted (clients must submit FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when last updated (clients must submit FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "templateId",
+        "name",
+        "slot",
+        "rarity",
+        "attackBonus",
+        "defenseBonus",
+        "hpBonus",
+        "critBonus",
+        "coinBonusPct",
+        "sellPrice",
+        "colorHex",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/hero_saves/{saveId}": {
+      "schema": {
+        "$ref": "#/entities/HeroSave"
+      },
+      "description": "User-scoped hero RPG save document."
+    },
+    "/users/{userId}/hero_items/{itemId}": {
+      "schema": {
+        "$ref": "#/entities/HeroItem"
+      },
+      "description": "User-scoped RPG equipment inventory subcollection."
+    }
+  }
+}
